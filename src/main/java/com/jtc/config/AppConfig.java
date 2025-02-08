@@ -38,11 +38,11 @@ public class AppConfig {
 	        return properties;
 	    }
 
-	    @Bean
+	  @Bean
 	    public LocalSessionFactoryBean sessionFactory() {
 	        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
 	        sessionFactory.setDataSource(dataSource());
-	        sessionFactory.setPackagesToScan("com.jtc.entity"); // Update to your package
+	        sessionFactory.setPackagesToScan("com.jtc.entity");
 	        sessionFactory.setHibernateProperties(hibernateProperties());
 
 	        return sessionFactory;

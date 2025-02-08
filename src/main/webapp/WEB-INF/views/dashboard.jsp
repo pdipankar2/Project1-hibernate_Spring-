@@ -1,5 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ page import="com.jtc.entity.Student"%>
+<%@include file="student/Navbar.jsp"%>
+<%@include file="component/css.jsp"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +9,12 @@
 <title>Student Dashboard</title>
 </head>
 <body>
+<div class="container p-5">
 	<h1>Welcome to your Dashboard</h1>
 	<h2>Your Details</h2>
-	<table border="1">
+	<table class="table" border="1">
 		<tr>
+			<th>SLNo</th>
 			<th>ID</th>
 			<th>Name</th>
 			<th>Email</th>
@@ -24,7 +28,7 @@
 			if (student != null) {
 			%>
 			<td><%=student.getId()%></td>
-
+            <td><%=student.getStudentId()%></td>
 			<td><%=student.getName()%></td>
 			<td><%=student.getEmail()%></td>
 			<td><%=student.getPhone()%></td>
@@ -43,6 +47,7 @@
 	<form action="logout" method="post">
 		<button type="submit">Logout</button>
 	</form>
+	</div>
 </body>
 </html>
 

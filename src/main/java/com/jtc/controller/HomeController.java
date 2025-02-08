@@ -1,5 +1,7 @@
 package com.jtc.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,11 @@ import com.jtc.util.OTPService;
 
 @Controller
 public class HomeController {
+	
+	
+	
+	//UPDATE students SET isAdmin = true WHERE email = 'Pdipankar28@gmail.com';
+
 
 	@Autowired
 	private StudentDao studentDao;
@@ -41,15 +48,27 @@ public class HomeController {
 	}
 
 	@RequestMapping(path = "registerStudent", method = RequestMethod.POST)
-	public String Addstudent(@ModelAttribute Student student) {
-		System.out.println(student);
+    public String Addstudent(@ModelAttribute Student student, Model model) {
+        try {
+            System.out.println(student);
 
-		int saveStudent = studentDao.saveStudent(student);
+            // Generate and set student ID
+            String studentId = studentDao.generateStudentId();
+           
+            student.setStudentId(studentId);
 
-		return "register";
+            int saveStudent = studentDao.saveStudent(student);
 
-	}
-
+            model.addAttribute("success", "Registration successful. Your Student ID is: " + studentId);
+            return "register";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "An error occurred during registration: " + e.getMessage());
+            return "register";
+        }
+    }
+	
+	
 	@GetMapping("login")
 	public String login() {
 		return "login"; // Return login view
@@ -68,22 +87,42 @@ public class HomeController {
 		}
 	}
 
+	/*
+	 * @PostMapping("verifyOtp") public String verifyOtp(@RequestParam String
+	 * email, @RequestParam String otp, Model model, HttpSession session) {
+	 * System.out.println("Verifying OTP for email: " + email + " with OTP: " +
+	 * otp);
+	 * 
+	 * String message = otpService.verifyOtp(email, otp); if
+	 * (message.equals("Login successful!")) { Student student =
+	 * studentDao.getStudentByEmail(email); session.setAttribute("student",
+	 * student); // Store student in session return "dashboard"; // Return dashboard
+	 * view } else { model.addAttribute("error", message); return "verifyOtp"; //
+	 * Return to verify OTP on error } }
+	 */
+	
 	@PostMapping("verifyOtp")
-	public String verifyOtp(@RequestParam String email, @RequestParam String otp, Model model, HttpSession session) {
-	    System.out.println("Verifying OTP for email: " + email + " with OTP: " + otp);
+    public String verifyOtp(@RequestParam String email, @RequestParam String otp, Model model, HttpSession session) {
+        System.out.println("Verifying OTP for email: " + email + " with OTP: " + otp);
 
-		
-		String message = otpService.verifyOtp(email, otp);
-		if (message.equals("Login successful!")) {
-			Student student = studentDao.getStudentByEmail(email);
-			session.setAttribute("student", student); // Store student in session
-			return "dashboard"; // Return dashboard view
-		} else {
-			model.addAttribute("error", message);
-			return "verifyOtp"; // Return to verify OTP on error
-		}
-	}
-
+        String message = otpService.verifyOtp(email, otp);
+        if (message.equals("Login successful!")) {
+            Student student = studentDao.getStudentByEmail(email);
+            session.setAttribute("student", student);
+            if (student.isAdmin()) {
+                return "redirect:adminPanel";
+            } else {
+                return "dashboard";
+            }
+        } else {
+            model.addAttribute("error", message);
+            return "verifyOtp";
+        }
+    }
+	
+	
+	
+	
 	@GetMapping("dashboard")
 	public String dashboard(Model model, HttpSession session) {
 		Student student = (Student) session.getAttribute("student");
@@ -100,4 +139,57 @@ public class HomeController {
 		session.invalidate(); // Invalidate the session
 		return "redirect:login"; // Redirect to login
 	}
+	
+	//admin 
+	
+	@GetMapping("adminPanel")
+    public String adminPanel(Model model, HttpSession session) {
+        Student admin = (Student) session.getAttribute("student");
+        if (admin != null && admin.isAdmin()) {
+            List<Student> students = studentDao.getAllStudents();
+            model.addAttribute("students", students);
+            return "adminPanel";
+        } else {
+            return "redirect:login";
+        }
+    }
+	
+	
+	@PostMapping("updateStudent")
+    public String updateStudent(@ModelAttribute Student student, HttpSession session) {
+        Student admin = (Student) session.getAttribute("student");
+        if (admin != null && admin.isAdmin()) {
+            studentDao.updateStudent(student);
+            return "redirect:adminPanel";
+        } else {
+            return "redirect:login";
+        }
+    }
+	
+	@PostMapping("deleteStudent")
+    public String deleteStudent(@RequestParam int id, HttpSession session) {
+        Student admin = (Student) session.getAttribute("student");
+        if (admin != null && admin.isAdmin()) {
+            studentDao.deleteStudent(id);
+            return "redirect:adminPanel";
+        } else {
+            return "redirect:login";
+        }
+    }
+	
+	
+	
+	@PostMapping("/setAdminAccess")
+    public String setAdminAccess(@RequestParam String email, @RequestParam boolean isAdmin, HttpSession session, Model model) {
+        Student currentUser = (Student) session.getAttribute("student");
+        if (currentUser != null && currentUser.isAdmin()) {
+            studentDao.setAdminAccess(email, isAdmin);
+            model.addAttribute("message", "Admin access updated successfully");
+        } else {
+            model.addAttribute("error", "You don't have permission to perform this action");
+        }
+        return "redirect:adminPanel";
+    }
+	
+	
 }

@@ -7,19 +7,34 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name ="student1")
+@Table(name ="students")
 public class Student {
 	
 	@Id
-	//@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
-
-	private String name;
-	private String email;
-	private String phone;
-	private String city;
-	private String course;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    
+    private String studentId;
+    private String name;
+    private String email;
+    private String phone;
+    private String city;
+    private String course;
+    private boolean isAdmin;
+	
+	
+	public boolean isAdmin() {
+		return isAdmin;
+	}
+	public void setAdmin(boolean isAdmin) {
+		this.isAdmin = isAdmin;
+	}
+	public String getStudentId() {
+		return studentId;
+	}
+	public void setStudentId(String studentId) {
+		this.studentId = studentId;
+	}
 	public int getId() {
 		return id;
 	}
@@ -58,11 +73,9 @@ public class Student {
 	}
 	@Override
 	public String toString() {
-		return "Student [id=" + id + ", name=" + name + ", email=" + email + ", phone=" + phone + ", city=" + city
-				+ ", course=" + course + "]";
+		return "Student [id=" + id + ", studentId=" + studentId + ", name=" + name + ", email=" + email + ", phone="
+				+ phone + ", city=" + city + ", course=" + course + ", isAdmin=" + isAdmin + "]";
 	}
-	
-	
 	
 	
     
